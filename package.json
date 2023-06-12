@@ -1,0 +1,21 @@
+{
+  "name": "libgpiod",
+  "version": "0.1.0",
+  "description": "Javascript bindings for libgpiod",
+  "main": "dist/index.js",
+  "scripts": {
+    "test": "yarn test",
+    "install": "node-gyp rebuild"
+  },
+  "keywords": [
+    "gpio",
+    "libgpiod"
+  ],
+  "author": "Marcin Malinowski",
+  "license": "ISC",
+  "gypfile": true,
+  "dependencies": {
+    "@types/bindings": "^1.5.1",
+    "bindings": "^1.5.0"
+  }
+}
