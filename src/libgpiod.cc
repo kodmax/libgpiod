@@ -1,7 +1,8 @@
-// hello.cc
-#include <node.h>
+#include <nan.h>
+#include <gpiod.h>
+#include <stdio.h>
 
-namespace demo {
+namespace libgpiod {
 
 using v8::FunctionCallbackInfo;
 using v8::Isolate;
