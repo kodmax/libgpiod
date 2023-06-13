@@ -18,7 +18,7 @@ console.log(getLibgpiodVersionString())
 const button = chipGetLine(chip, 27)
 const led = chipGetLine(chip, 17)
 
-lineRequestEvents(button, 'ButtonExample', 'Both')
+lineRequestEvents(button, 'ButtonExample', 'both')
 lineRequestOutput(led, 'ButtonExample', 0)
 
 while (true) {
