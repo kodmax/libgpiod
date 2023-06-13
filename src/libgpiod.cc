@@ -38,6 +38,27 @@ void chip_open_by_name(const FunctionCallbackInfo<Value> &args) {
   }
 }
 
+void chip_open_lookup(const FunctionCallbackInfo<Value> &args) {
+  Isolate *isolate = args.GetIsolate();
+
+  if (args.Length() != 1 || !args[0]->IsString()) {
+    isolate->ThrowException(Exception::TypeError(String::NewFromUtf8(isolate, "Wrong arguments").ToLocalChecked()));
+    return;
+  }
+
+  String::Utf8Value chipname(isolate, args[0]);
+  struct gpiod_chip *chip;
+
+  chip = gpiod_chip_open_lookup(*chipname);
+
+  if (chip != NULL) {
+    args.GetReturnValue().Set(External::New(isolate, chip));
+
+  } else {
+    args.GetReturnValue().Set(Null(isolate));
+  }
+}
+
 void chip_close(const FunctionCallbackInfo<Value> &args) {
   Isolate *isolate = args.GetIsolate();
 
@@ -265,6 +286,7 @@ void version_string(const FunctionCallbackInfo<Value> &args) {
 
 void initialize(Local<Object> exports, Local<Value> module, Local<Context> ctx) {
   NODE_SET_METHOD(exports, "chip_open_by_name", chip_open_by_name);
+  NODE_SET_METHOD(exports, "chip_open_lookup", chip_open_lookup);
   NODE_SET_METHOD(exports, "chip_get_line", chip_get_line);
   NODE_SET_METHOD(exports, "line_release", line_release);
   NODE_SET_METHOD(exports, "chip_close", chip_close);

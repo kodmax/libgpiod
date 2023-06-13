@@ -5,6 +5,7 @@ export * from './consts'
 
 const {
     chip_open_by_name,
+    chip_open_lookup,
     chip_close,
     chip_get_line,
     line_release,
@@ -21,6 +22,18 @@ const {
     line_event_read_fd,
     version_string
 } = bind('gpiod.node')
+
+/**
+ * @brief Open a gpiochip based on the best guess what the path is.
+ * @param name f.ex gpiochip0
+ * 
+ * This routine tries to figure out whether the user passed it the path to the
+ * GPIO chip, its name, label or number as a string. Then it tries to open it
+ * using one of the gpiod_chip_open** variants.
+ */
+export const chipOpenLookup = (name: string): Chip | null => {
+    return chip_open_lookup(name)
+}
 
 /**
  * @brief Open a gpiochip by name.
