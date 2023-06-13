@@ -110,6 +110,48 @@ void line_request_input(const FunctionCallbackInfo<Value> &args) {
   args.GetReturnValue().Set(Number::New(isolate, status));
 }
 
+void line_request_rising_edge_events(const FunctionCallbackInfo<Value> &args) {
+  Isolate *isolate = args.GetIsolate();
+
+  if (args.Length() != 2 || !args[0]->IsExternal() || !args[1]->IsString()) {
+    isolate->ThrowException(Exception::TypeError(String::NewFromUtf8(isolate, "Wrong arguments").ToLocalChecked()));
+    return;
+  }
+
+  String::Utf8Value consumer(isolate, args[1]);
+
+  int status = gpiod_line_request_rising_edge_events((gpiod_line *)External::Cast(*args[0])->Value(), *consumer);
+  args.GetReturnValue().Set(Number::New(isolate, status));
+}
+
+void line_request_falling_edge_events(const FunctionCallbackInfo<Value> &args) {
+  Isolate *isolate = args.GetIsolate();
+
+  if (args.Length() != 2 || !args[0]->IsExternal() || !args[1]->IsString()) {
+    isolate->ThrowException(Exception::TypeError(String::NewFromUtf8(isolate, "Wrong arguments").ToLocalChecked()));
+    return;
+  }
+
+  String::Utf8Value consumer(isolate, args[1]);
+
+  int status = gpiod_line_request_falling_edge_events((gpiod_line *)External::Cast(*args[0])->Value(), *consumer);
+  args.GetReturnValue().Set(Number::New(isolate, status));
+}
+
+void line_request_both_edges_events(const FunctionCallbackInfo<Value> &args) {
+  Isolate *isolate = args.GetIsolate();
+
+  if (args.Length() != 2 || !args[0]->IsExternal() || !args[1]->IsString()) {
+    isolate->ThrowException(Exception::TypeError(String::NewFromUtf8(isolate, "Wrong arguments").ToLocalChecked()));
+    return;
+  }
+
+  String::Utf8Value consumer(isolate, args[1]);
+
+  int status = gpiod_line_request_both_edges_events((gpiod_line *)External::Cast(*args[0])->Value(), *consumer);
+  args.GetReturnValue().Set(Number::New(isolate, status));
+}
+
 void line_set_value(const FunctionCallbackInfo<Value> &args) {
   Isolate *isolate = args.GetIsolate();
 
@@ -145,6 +187,9 @@ void initialize(Local<Object> exports, Local<Value> module, Local<Context> ctx) 
   NODE_SET_METHOD(exports, "chip_get_line", chip_get_line);
   NODE_SET_METHOD(exports, "line_request_output", line_request_output);
   NODE_SET_METHOD(exports, "line_request_input", line_request_input);
+  NODE_SET_METHOD(exports, "line_request_rising_edge_events", line_request_rising_edge_events);
+  NODE_SET_METHOD(exports, "line_request_falling_edge_events", line_request_falling_edge_events);
+  NODE_SET_METHOD(exports, "line_request_both_edges_events", line_request_both_edges_events);
   NODE_SET_METHOD(exports, "line_get_value", line_get_value);
   NODE_SET_METHOD(exports, "line_set_value", line_set_value);
   NODE_SET_METHOD(exports, "line_release", line_release);
