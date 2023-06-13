@@ -77,6 +77,39 @@ void line_release(const FunctionCallbackInfo<Value> &args) {
   gpiod_line_release((gpiod_line *)External::Cast(*args[0])->Value());
 }
 
+void line_request_output(const FunctionCallbackInfo<Value> &args) {
+  Isolate *isolate = args.GetIsolate();
+
+  if (args.Length() != 3 || !args[0]->IsExternal() || !args[1]->IsString() || !args [2]->IsNumber()) {
+    isolate->ThrowException(Exception::TypeError(String::NewFromUtf8(isolate, "Wrong arguments").ToLocalChecked()));
+    return;
+  }
+
+  String::Utf8Value consumer(isolate, args[1]);
+  uint32_t defaultVal = args[2]->Int32Value(context).FromMaybe(0xffffffff);
+  if (defaultVal == 0xffffffff) {
+    isolate->ThrowException(Exception::TypeError(String::NewFromUtf8(isolate, "Wrong default value").ToLocalChecked()));
+    return;
+  }
+
+  int status = gpiod_line_request_output((gpiod_line *)External::Cast(*args[0])->Value(), *consumer, defaultVal);
+  args.GetReturnValue().Set(Number::New(isolate, status));
+}
+
+void line_request_input(const FunctionCallbackInfo<Value> &args) {
+  Isolate *isolate = args.GetIsolate();
+
+  if (args.Length() != 2 || !args[0]->IsExternal() || !args[1]->IsString()) {
+    isolate->ThrowException(Exception::TypeError(String::NewFromUtf8(isolate, "Wrong arguments").ToLocalChecked()));
+    return;
+  }
+
+  String::Utf8Value consumer(isolate, args[1]);
+
+  int status = gpiod_line_request_input((gpiod_line *)External::Cast(*args[0])->Value(), *consumer);
+  args.GetReturnValue().Set(Number::New(isolate, status));
+}
+
 void blink(const FunctionCallbackInfo<Value> &args) {
   Isolate *isolate = args.GetIsolate();
 
@@ -85,17 +118,9 @@ void blink(const FunctionCallbackInfo<Value> &args) {
     return;
   }
 
-  // const char *chipname = "gpiochip0";
-
   struct gpiod_line *lineGreen = (gpiod_line *)External::Cast(*args[0])->Value();
   struct gpiod_line *lineButton = (gpiod_line *)External::Cast(*args[1])->Value();
   int i, val;
-
-  //   // Open LED lines for output
-  gpiod_line_request_output(lineGreen, "example1", 0);
-
-  //   // Open switch line for input
-  gpiod_line_request_input(lineButton, "example1");
 
   // Blink LEDs in a binary pattern
   i = 0;
@@ -120,6 +145,9 @@ void initialize(Local<Object> exports, Local<Value> module, Local<Context> ctx) 
 
   NODE_SET_METHOD(exports, "chip_get_line", chip_get_line);
   NODE_SET_METHOD(exports, "line_release", line_release);
+
+  NODE_SET_METHOD(exports, "line_request_output", line_request_output);
+  NODE_SET_METHOD(exports, "line_request_input", line_request_input);
 
   NODE_SET_METHOD(exports, "blink", blink);
 
