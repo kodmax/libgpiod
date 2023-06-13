@@ -144,6 +144,18 @@ void line_event_wait(const FunctionCallbackInfo<Value> &args) {
   args.GetReturnValue().Set(Number::New(isolate, status));
 }
 
+void line_event_get_fd(const FunctionCallbackInfo<Value> &args) {
+  Isolate *isolate = args.GetIsolate();
+
+  if (args.Length() != 1 || !args[0]->IsExternal()) {
+    isolate->ThrowException(Exception::TypeError(String::NewFromUtf8(isolate, "Wrong arguments").ToLocalChecked()));
+    return;
+  }
+
+  int fd = gpiod_line_event_get_fd((gpiod_line *)External::Cast(*args[0])->Value());
+  args.GetReturnValue().Set(Number::New(isolate, fd));
+}
+
 void line_event_read(const FunctionCallbackInfo<Value> &args) {
   Isolate *isolate = args.GetIsolate();
 
@@ -156,6 +168,28 @@ void line_event_read(const FunctionCallbackInfo<Value> &args) {
   gpiod_line_event event;
 
   int status = gpiod_line_event_read((gpiod_line *)External::Cast(*args[0])->Value(), &event);
+  ret->Set(isolate->GetCurrentContext(), 0, Number::New(isolate, status));
+  ret->Set(isolate->GetCurrentContext(), 1, Number::New(isolate, event.event_type));
+  ret->Set(isolate->GetCurrentContext(), 2, Number::New(isolate, event.ts.tv_sec));
+  ret->Set(isolate->GetCurrentContext(), 3, Number::New(isolate, event.ts.tv_nsec));
+
+  args.GetReturnValue().Set(ret);
+}
+
+void line_event_read_fd(const FunctionCallbackInfo<Value> &args) {
+  Isolate *isolate = args.GetIsolate();
+
+  if (args.Length() != 1 || !args[0]->IsNumber()) {
+    isolate->ThrowException(Exception::TypeError(String::NewFromUtf8(isolate, "Wrong arguments").ToLocalChecked()));
+    return;
+  }
+
+  Local<Array> ret = Array::New(isolate, 4);
+  gpiod_line_event event;
+
+  int fd = args[0]->Int32Value(isolate->GetCurrentContext()).FromMaybe(-1);
+
+  int status = gpiod_line_event_read_fd(fd, &event);
   ret->Set(isolate->GetCurrentContext(), 0, Number::New(isolate, status));
   ret->Set(isolate->GetCurrentContext(), 1, Number::New(isolate, event.event_type));
   ret->Set(isolate->GetCurrentContext(), 2, Number::New(isolate, event.ts.tv_sec));
@@ -204,6 +238,21 @@ void line_get_value(const FunctionCallbackInfo<Value> &args) {
   args.GetReturnValue().Set(Number::New(isolate, val));
 }
 
+void version_string(const FunctionCallbackInfo<Value> &args) {
+  Isolate *isolate = args.GetIsolate();
+
+  if (args.Length() != 0) {
+    isolate->ThrowException(Exception::TypeError(String::NewFromUtf8(isolate, "Wrong arguments").ToLocalChecked()));
+    return;
+  }
+
+  const char *ver = gpiod_version_string();
+
+  args.GetReturnValue().Set(
+    String::NewFromUtf8(isolate, ver).FromMaybe(String::NewFromUtf8(isolate, "unknown").ToLocalChecked())
+  );
+}
+
 void initialize(Local<Object> exports, Local<Value> module, Local<Context> ctx) {
   NODE_SET_METHOD(exports, "chip_open_by_name", chip_open_by_name);
   NODE_SET_METHOD(exports, "chip_get_line", chip_get_line);
@@ -219,8 +268,12 @@ void initialize(Local<Object> exports, Local<Value> module, Local<Context> ctx) 
   NODE_SET_METHOD(exports, "line_request_falling_edge_events", line_request_falling_edge_events);
   NODE_SET_METHOD(exports, "line_request_rising_edge_events", line_request_rising_edge_events);
   NODE_SET_METHOD(exports, "line_request_both_edges_events", line_request_both_edges_events);
+  NODE_SET_METHOD(exports, "line_event_read_fd", line_event_read_fd);
+  NODE_SET_METHOD(exports, "line_event_get_fd", line_event_get_fd);
   NODE_SET_METHOD(exports, "line_event_wait", line_event_wait);
   NODE_SET_METHOD(exports, "line_event_read", line_event_read);
+
+  NODE_SET_METHOD(exports, "version_string", version_string);
 }
 
 NODE_MODULE(NODE_GYP_MODULE_NAME, initialize)
