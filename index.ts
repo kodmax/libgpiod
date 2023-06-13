@@ -1,7 +1,8 @@
-import { Chip, Line, ConsumerId, BitValue, SSuccess, SError, SEvent, STimeout, Event, Edge } from './typings'
+import { Chip, Line, ConsumerId, BitValue, SSuccess, SError, SEvent, STimeout, Event, Edge } from './types/types'
 import bind from 'bindings'
 
-export * from './consts'
+export * from './types/types'
+export * from './types/consts'
 
 const {
     chip_open_by_name,

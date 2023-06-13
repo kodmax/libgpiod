@@ -1,4 +1,16 @@
-import { chipOpenByName, chipGetLine, lineRequestOutput, lineSetValue, getLibgpiodVersionString, lineRequestEvents, lineEventWait, SEvent, lineEventRead, SError, EvFalling } from '../index'
+import {
+    chipOpenByName,
+    chipGetLine,
+    lineRequestOutput,
+    lineSetValue,
+    getLibgpiodVersionString,
+    lineRequestEvents,
+    lineEventWait,
+    lineEventRead,
+    StatusEvent,
+    StatusError,
+    EventTypeFalling
+} from '../index'
 
 const chip = chipOpenByName('gpiochip0')
 console.log(getLibgpiodVersionString())
@@ -11,12 +23,12 @@ lineRequestOutput(led, 'ButtonExample', 0)
 
 while (true) {
     const status = lineEventWait(button, 10, 0)
-    if (status === SEvent) {
+    if (status === StatusEvent) {
         const event = lineEventRead(button)
         console.log(event)
 
-        if (event !== SError) {
-            lineSetValue(led, event.type === EvFalling ? 0 : 1)
+        if (event !== StatusError) {
+            lineSetValue(led, event.type === EventTypeFalling ? 0 : 1)
         }
     }
 }

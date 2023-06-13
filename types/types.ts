@@ -1,9 +1,20 @@
-import { BothEdges, EvFalling, EvRising, FallingEdge, RisingEdge, SError, SEvent, SSuccess, STimeout } from "../consts"
+import {
+    EventTypeFalling,
+    EventTypeRising,
+    FallingEdge,
+    RisingEdge,
+    BothEdges,
 
-export type SSuccess = typeof SSuccess
-export type SError = typeof SError
-export type STimeout = typeof STimeout
-export type SEvent = typeof SEvent
+    StatusSuccess,
+    StatusTimeout,
+    StatusError,
+    StatusEvent
+} from "./consts"
+
+export type SSuccess = typeof StatusSuccess
+export type SError = typeof StatusError
+export type STimeout = typeof StatusTimeout
+export type SEvent = typeof StatusEvent
     
 export type Edge = typeof FallingEdge | typeof RisingEdge | typeof BothEdges
 export type ConsumerId = string
@@ -13,10 +24,7 @@ export type Timespec = {
     sec: number
 }
 
-export type EvFalling = typeof EvFalling
-export type EvRising = typeof EvRising
-
-export type EventType = EvRising | EvFalling
+export type EventType = typeof EventTypeFalling | typeof EventTypeRising
 
 export type Event = {
     type: EventType
