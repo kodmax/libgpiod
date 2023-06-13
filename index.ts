@@ -123,13 +123,13 @@ export const getLibgpiodVersionString = (): string => {
 export const lineRequestEvents = (line: Line, consumerId: ConsumerId, edge: Edge): SSuccess | SError => {
     switch (edge) {
 
-        case 'Falling':
+        case 'falling':
             return line_request_falling_edge_events(line, consumerId)
 
-        case 'Rising':
+        case 'rising':
             return line_request_rising_edge_events(line, consumerId)
 
-        case 'Both':
+        case 'both':
             return line_request_both_edges_events(line, consumerId)
     }
 }
