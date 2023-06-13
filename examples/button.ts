@@ -2,20 +2,12 @@ import bind from 'bindings'
 
 const {
     chip_open_by_name,
-    chip_close,
     chip_get_line,
-    line_release,
     line_request_output,
-    line_request_input,
-    line_get_value,
     line_set_value,
-    line_request_rising_edge_events,
-    line_request_falling_edge_events,
     line_request_both_edges_events,
     line_event_wait,
     line_event_read,
-    line_event_get_fd,
-    line_event_read_fd,
     version_string
 } = bind('gpiod.node')
 
@@ -37,8 +29,3 @@ while (true) {
         console.log(event)
     }
 }
-
-line_release(button)
-line_release(led)
-
-chip_close(chip)
