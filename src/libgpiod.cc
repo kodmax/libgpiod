@@ -11,6 +11,7 @@ using v8::External;
 using v8::FunctionCallbackInfo;
 using v8::Isolate;
 using v8::Local;
+using v8::Null;
 using v8::Number;
 using v8::Object;
 using v8::String;
@@ -29,7 +30,12 @@ void chip_open_by_name(const FunctionCallbackInfo<Value> &args) {
 
   chip = gpiod_chip_open_by_name(*chipname);
 
-  args.GetReturnValue().Set(External::New(isolate, chip));
+  if (chip != NULL) {
+    args.GetReturnValue().Set(External::New(isolate, chip));
+
+  } else {
+    args.GetReturnValue().Set(Null(isolate));
+  }
 }
 
 void chip_close(const FunctionCallbackInfo<Value> &args) {
@@ -57,7 +63,12 @@ void chip_get_line(const FunctionCallbackInfo<Value> &args) {
       (gpiod_chip *)External::Cast(*args[0])->Value(),
       offset);
 
-  args.GetReturnValue().Set(External::New(isolate, line));
+  if (line != NULL) {
+    args.GetReturnValue().Set(External::New(isolate, line));
+
+  } else {
+    args.GetReturnValue().Set(Null(isolate));
+  }
 }
 
 void line_release(const FunctionCallbackInfo<Value> &args) {
@@ -74,7 +85,7 @@ void line_release(const FunctionCallbackInfo<Value> &args) {
 void line_request_output(const FunctionCallbackInfo<Value> &args) {
   Isolate *isolate = args.GetIsolate();
 
-  if (args.Length() != 3 || !args[0]->IsExternal() || !args[1]->IsString() || !args [2]->IsNumber()) {
+  if (args.Length() != 3 || !args[0]->IsExternal() || !args[1]->IsString() || !args[2]->IsNumber()) {
     isolate->ThrowException(Exception::TypeError(String::NewFromUtf8(isolate, "Wrong arguments").ToLocalChecked()));
     return;
   }
@@ -215,7 +226,7 @@ void line_request_both_edges_events(const FunctionCallbackInfo<Value> &args) {
 void line_set_value(const FunctionCallbackInfo<Value> &args) {
   Isolate *isolate = args.GetIsolate();
 
-  if (args.Length() != 2 || !args[0]->IsExternal() || !args [1]->IsNumber()) {
+  if (args.Length() != 2 || !args[0]->IsExternal() || !args[1]->IsNumber()) {
     isolate->ThrowException(Exception::TypeError(String::NewFromUtf8(isolate, "Wrong arguments").ToLocalChecked()));
     return;
   }
@@ -249,8 +260,7 @@ void version_string(const FunctionCallbackInfo<Value> &args) {
   const char *ver = gpiod_version_string();
 
   args.GetReturnValue().Set(
-    String::NewFromUtf8(isolate, ver).FromMaybe(String::NewFromUtf8(isolate, "unknown").ToLocalChecked())
-  );
+      String::NewFromUtf8(isolate, ver).FromMaybe(String::NewFromUtf8(isolate, "unknown").ToLocalChecked()));
 }
 
 void initialize(Local<Object> exports, Local<Value> module, Local<Context> ctx) {

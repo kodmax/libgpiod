@@ -1,16 +1,10 @@
-import bind from 'bindings'
-const {
-    chip_open_by_name,
-    chip_get_line,
-    line_request_output,
-    line_set_value
-} = bind('gpiod.node')
+import { chipOpenByName, chipGetLine, lineRequestOutput, lineSetValue } from '../index'
 
-const chip: unknown = chip_open_by_name('gpiochip0')
-const line17: unknown = chip_get_line(chip, 17)
-line_request_output(line17, "blink17", 1)
+const chip = chipOpenByName('gpiochip0')
+const line17 = chipGetLine(chip, 17)
 
+lineRequestOutput(line17, "blink17", 1)
 let i = 0
 setInterval(() => {
-    line_set_value(line17, ++i % 2)
-}, 50)
+    lineSetValue(line17, ++i % 2 ? 1 : 0)
+}, 150)

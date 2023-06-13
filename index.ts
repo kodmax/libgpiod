@@ -1,4 +1,7 @@
+import { Chip, Line, ConsumerId, BitValue, SSuccess, SError, SEvent, STimeout, Event, Edge } from './typings'
 import bind from 'bindings'
+
+export * from './consts'
 
 const {
     chip_open_by_name,
@@ -19,26 +22,143 @@ const {
     version_string
 } = bind('gpiod.node')
 
-console.log(version_string())
+/**
+ * @brief Open a gpiochip by name.
+ * @param name f.ex gpiochip0
+ */
+export const chipOpenByName = (name: string): Chip | null => {
+    return chip_open_by_name(name)
+}
 
-const chip: unknown = chip_open_by_name('gpiochip0')
+/**
+ * @brief Close a GPIO chip handle and release all allocated resources.
+ * @param chip 
+ */
+export const chipClose = (chip: Chip): void => {
+    chip_close(chip)
+}
 
-const button: unknown = chip_get_line(chip, 27)
-const led: unknown = chip_get_line(chip, 17)
+/**
+ * @brief Get the handle to the GPIO line at given offset.
+ * @param chip
+ * @param offset GPIO line number (f.ex 27)
+ */
+export const chipGetLine = (chip: Chip, offset: number): Line | null => {
+    return chip_get_line(chip, offset)
+}
 
-line_request_both_edges_events(button, "button")
-line_request_output(led, "button", 0)
+/**
+ * @brief Reserve a single line, set the direction to output.
+ * @param line
+ * @param consumerId an identifier of the client, can be any string indicating your application
+ * @param initialValue initial value of the output
+ */
+export const lineRequestOutput = (line: Line, consumerId: ConsumerId, initialValue: BitValue): SSuccess | SError => {
+    return line_request_output(line, consumerId, initialValue)
+}
 
-while (true) {
-    const status = line_event_wait(button, 1, 0)
-    if (status === 1) {
-        const event = line_event_read(button)
-        line_set_value(led, event[1]-1)
-        console.log(event)
+/**
+ * @brief Reserve a single line, set the direction to input.
+ * @param line 
+ * @param consumerId an identifier of the client, can be any string indicating your application
+ */
+export const lineRequestInput = (line: Line, consumerId: ConsumerId): SSuccess | SError => {
+    return line_request_input(line, consumerId)
+}
+
+/**
+ * @brief Release a previously reserved line.
+ * @param line 
+ */
+export const lineRelease = (line: Line): void => {
+    line_release(line)
+}
+
+/**
+ * @brief Set the value of a single GPIO line.
+ * @param line
+ * @param value 
+ */
+export const lineSetValue = (line: Line, value: BitValue): SSuccess | SError => {
+    return line_set_value(line, value)
+}
+
+/**
+ * @brief Read current value of a single GPIO line.
+ * @param line
+ * @param value 
+ */
+export const lineGetValue = (line: Line): BitValue | SError => {
+    return line_get_value(line)
+}
+
+
+/**
+ * @brief Get the API version of the library as a human-readable string.
+ */
+export const getLibgpiodVersionString = (): string => {
+    return version_string()
+}
+
+/**
+ * @brief Request notifications on a single line.
+ * @param line 
+ * @param consumerId 
+ * @param edge 
+ */
+export const lineRequestEvents = (line: Line, consumerId: ConsumerId, edge: Edge): SSuccess | SError => {
+    switch (edge) {
+
+        case 'Falling':
+            return line_request_falling_edge_events(line, consumerId)
+
+        case 'Rising':
+            return line_request_rising_edge_events(line, consumerId)
+
+        case 'Both':
+            return line_request_both_edges_events(line, consumerId)
     }
 }
 
-line_release(button)
-line_release(led)
+/**
+ * @brief Wait for an event on a single line.
+ * @param line 
+ * @param timeout 
+ */
+export const lineEventWait = (line: Line, sec: number, nanosec: number): STimeout | SEvent | SError => {
+    return line_event_wait(line, sec, nanosec)
+}
 
-chip_close(chip)
+/**
+ * @brief Read next pending event from the GPIO line. 
+ * @param line 
+ * @returns 
+ */
+export const lineEventRead = (line: Line): Event | SError => {
+    const event = line_event_read(line)
+    return event[0] === 0
+        ? {
+            ts: event[2] + event[3] / 1000_000_000,
+            type: event[1]
+        }
+        : -1
+}
+
+/**
+ * @brief Get the event file descriptor.
+ * @param line
+ * @returns 
+ */
+export const lineEventGetFD = (line: Line): number | SError => {
+    return line_event_get_fd(line)
+}
+
+export const lineEventReadFd = (fd: number): Event | SError => {
+    const event = line_event_read_fd(fd)
+    return event[0] === 0
+        ? {
+            ts: event[2] + event[3] / 1000_000_000,
+            type: event[1]
+        }
+        : -1
+}
