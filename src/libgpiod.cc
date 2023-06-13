@@ -110,46 +110,45 @@ void line_request_input(const FunctionCallbackInfo<Value> &args) {
   args.GetReturnValue().Set(Number::New(isolate, status));
 }
 
-void blink(const FunctionCallbackInfo<Value> &args) {
+void line_set_value(const FunctionCallbackInfo<Value> &args) {
   Isolate *isolate = args.GetIsolate();
 
-  if (args.Length() != 2 || !args[0]->IsExternal() || !args[1]->IsExternal()) {
+  if (args.Length() != 2 || !args[0]->IsExternal() || !args [1]->IsNumber()) {
     isolate->ThrowException(Exception::TypeError(String::NewFromUtf8(isolate, "Wrong arguments").ToLocalChecked()));
     return;
   }
 
-  struct gpiod_line *lineGreen = (gpiod_line *)External::Cast(*args[0])->Value();
-  struct gpiod_line *lineButton = (gpiod_line *)External::Cast(*args[1])->Value();
-  int i, val;
-
-  // Blink LEDs in a binary pattern
-  i = 0;
-  while (true) {
-    gpiod_line_set_value(lineGreen, (i & 2) != 0);
-    // Read button status and exit if pressed
-    val = gpiod_line_get_value(lineButton);
-    if (val == 1) {
-      break;
-    }
-
-    usleep(10000);
-    i++;
+  uint32_t val = args[1]->Int32Value(context).FromMaybe(0xffffffff);
+  if (val == 0xffffffff) {
+    isolate->ThrowException(Exception::TypeError(String::NewFromUtf8(isolate, "Wrong value").ToLocalChecked()));
+    return;
   }
 
-  args.GetReturnValue().Set(String::NewFromUtf8(isolate, "").ToLocalChecked());
+  int status = gpiod_line_set_value((gpiod_line *)External::Cast(*args[0])->Value(), val);
+  args.GetReturnValue().Set(Number::New(isolate, status));
+}
+
+void line_get_value(const FunctionCallbackInfo<Value> &args) {
+  Isolate *isolate = args.GetIsolate();
+
+  if (args.Length() != 1 || !args[0]->IsExternal()) {
+    isolate->ThrowException(Exception::TypeError(String::NewFromUtf8(isolate, "Wrong arguments").ToLocalChecked()));
+    return;
+  }
+
+  int val = gpiod_line_get_value((gpiod_line *)External::Cast(*args[0])->Value());
+  args.GetReturnValue().Set(Number::New(isolate, val));
 }
 
 void initialize(Local<Object> exports, Local<Value> module, Local<Context> ctx) {
   NODE_SET_METHOD(exports, "chip_open_by_name", chip_open_by_name);
-  NODE_SET_METHOD(exports, "chip_close", chip_close);
-
   NODE_SET_METHOD(exports, "chip_get_line", chip_get_line);
-  NODE_SET_METHOD(exports, "line_release", line_release);
-
   NODE_SET_METHOD(exports, "line_request_output", line_request_output);
   NODE_SET_METHOD(exports, "line_request_input", line_request_input);
-
-  NODE_SET_METHOD(exports, "blink", blink);
+  NODE_SET_METHOD(exports, "line_get_value", line_get_value);
+  NODE_SET_METHOD(exports, "line_set_value", line_set_value);
+  NODE_SET_METHOD(exports, "line_release", line_release);
+  NODE_SET_METHOD(exports, "chip_close", chip_close);
 
   context = ctx;
 }
