@@ -52,12 +52,7 @@ void chip_get_line(const FunctionCallbackInfo<Value> &args) {
     return;
   }
 
-  uint32_t offset = args[1]->Uint32Value(context).FromMaybe(0xffffffff);
-
-  if (offset == 0xffffffff) {
-    isolate->ThrowException(Exception::TypeError(String::NewFromUtf8(isolate, "Wrong line number").ToLocalChecked()));
-    return;
-  }
+  uint32_t offset = args[1]->Uint32Value(context).FromMaybe(0);
 
   struct gpiod_line *line = gpiod_chip_get_line(
       (gpiod_chip *)External::Cast(*args[0])->Value(),
@@ -86,11 +81,7 @@ void line_request_output(const FunctionCallbackInfo<Value> &args) {
   }
 
   String::Utf8Value consumer(isolate, args[1]);
-  uint32_t defaultVal = args[2]->Int32Value(context).FromMaybe(0xffffffff);
-  if (defaultVal == 0xffffffff) {
-    isolate->ThrowException(Exception::TypeError(String::NewFromUtf8(isolate, "Wrong default value").ToLocalChecked()));
-    return;
-  }
+  uint32_t defaultVal = args[2]->Int32Value(context).FromMaybe(0);
 
   int status = gpiod_line_request_output((gpiod_line *)External::Cast(*args[0])->Value(), *consumer, defaultVal);
   args.GetReturnValue().Set(Number::New(isolate, status));
@@ -138,6 +129,22 @@ void line_request_falling_edge_events(const FunctionCallbackInfo<Value> &args) {
   args.GetReturnValue().Set(Number::New(isolate, status));
 }
 
+void line_event_wait(const FunctionCallbackInfo<Value> &args) {
+  Isolate *isolate = args.GetIsolate();
+
+  if (args.Length() != 3 || !args[0]->IsExternal() || !args[1]->IsNumber() || !args[2]->IsNumber()) {
+    isolate->ThrowException(Exception::TypeError(String::NewFromUtf8(isolate, "Wrong arguments").ToLocalChecked()));
+    return;
+  }
+
+  timespec ts = {
+      .tv_sec = args[1]->IntegerValue(context).FromMaybe(0),
+      .tv_nsec = args[2]->IntegerValue(context).FromMaybe(0)};
+
+  int status = gpiod_line_event_wait((gpiod_line *)External::Cast(*args[0])->Value(), &ts);
+  args.GetReturnValue().Set(Number::New(isolate, status));
+}
+
 void line_request_both_edges_events(const FunctionCallbackInfo<Value> &args) {
   Isolate *isolate = args.GetIsolate();
 
@@ -160,11 +167,7 @@ void line_set_value(const FunctionCallbackInfo<Value> &args) {
     return;
   }
 
-  uint32_t val = args[1]->Int32Value(context).FromMaybe(0xffffffff);
-  if (val == 0xffffffff) {
-    isolate->ThrowException(Exception::TypeError(String::NewFromUtf8(isolate, "Wrong value").ToLocalChecked()));
-    return;
-  }
+  uint32_t val = args[1]->Int32Value(context).FromMaybe(0);
 
   int status = gpiod_line_set_value((gpiod_line *)External::Cast(*args[0])->Value(), val);
   args.GetReturnValue().Set(Number::New(isolate, status));
@@ -185,15 +188,19 @@ void line_get_value(const FunctionCallbackInfo<Value> &args) {
 void initialize(Local<Object> exports, Local<Value> module, Local<Context> ctx) {
   NODE_SET_METHOD(exports, "chip_open_by_name", chip_open_by_name);
   NODE_SET_METHOD(exports, "chip_get_line", chip_get_line);
-  NODE_SET_METHOD(exports, "line_request_output", line_request_output);
-  NODE_SET_METHOD(exports, "line_request_input", line_request_input);
-  NODE_SET_METHOD(exports, "line_request_rising_edge_events", line_request_rising_edge_events);
-  NODE_SET_METHOD(exports, "line_request_falling_edge_events", line_request_falling_edge_events);
-  NODE_SET_METHOD(exports, "line_request_both_edges_events", line_request_both_edges_events);
-  NODE_SET_METHOD(exports, "line_get_value", line_get_value);
-  NODE_SET_METHOD(exports, "line_set_value", line_set_value);
   NODE_SET_METHOD(exports, "line_release", line_release);
   NODE_SET_METHOD(exports, "chip_close", chip_close);
+
+  NODE_SET_METHOD(exports, "line_request_output", line_request_output);
+  NODE_SET_METHOD(exports, "line_set_value", line_set_value);
+
+  NODE_SET_METHOD(exports, "line_request_input", line_request_input);
+  NODE_SET_METHOD(exports, "line_get_value", line_get_value);
+
+  NODE_SET_METHOD(exports, "line_request_falling_edge_events", line_request_falling_edge_events);
+  NODE_SET_METHOD(exports, "line_request_rising_edge_events", line_request_rising_edge_events);
+  NODE_SET_METHOD(exports, "line_request_both_edges_events", line_request_both_edges_events);
+  NODE_SET_METHOD(exports, "line_event_wait", line_event_wait);
 
   context = ctx;
 }
