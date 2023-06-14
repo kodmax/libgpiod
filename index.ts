@@ -21,7 +21,8 @@ const {
     line_event_read,
     line_event_get_fd,
     line_event_read_fd,
-    version_string
+    version_string,
+    line_trigger
 } = bind('gpiod.node')
 
 /**
@@ -95,6 +96,10 @@ export const lineRelease = (line: Line): void => {
  */
 export const lineSetValue = (line: Line, value: BitValue): SSuccess | SError => {
     return line_set_value(line, value)
+}
+
+export const lineTrigger = (line: Line, value: BitValue, usec: number): SSuccess | SError => {
+    return line_trigger(line, value, usec)
 }
 
 /**

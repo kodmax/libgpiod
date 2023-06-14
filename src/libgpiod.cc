@@ -258,6 +258,24 @@ void line_set_value(const FunctionCallbackInfo<Value> &args) {
   args.GetReturnValue().Set(Number::New(isolate, status));
 }
 
+void line_trigger(const FunctionCallbackInfo<Value> &args) {
+  Isolate *isolate = args.GetIsolate();
+
+  if (args.Length() != 3 || !args[0]->IsExternal() || !args[1]->IsNumber() || !args[2]->IsNumber()) {
+    isolate->ThrowException(Exception::TypeError(String::NewFromUtf8(isolate, "Wrong arguments").ToLocalChecked()));
+    return;
+  }
+
+  uint32_t usec = args[2]->Uint32Value(isolate->GetCurrentContext()).FromMaybe(0);
+  uint32_t val = args[1]->Int32Value(isolate->GetCurrentContext()).FromMaybe(0);
+
+  int s1 = gpiod_line_set_value((gpiod_line *)External::Cast(*args[0])->Value(), val);
+  int s2 = usleep(usec);
+  int s3 = gpiod_line_set_value((gpiod_line *)External::Cast(*args[0])->Value(), 1 - val);
+
+  args.GetReturnValue().Set(Number::New(isolate, s1 == 0 && s2 == 0 && s3 == 0 ? 0 : -1));
+}
+
 void line_get_value(const FunctionCallbackInfo<Value> &args) {
   Isolate *isolate = args.GetIsolate();
 
@@ -306,6 +324,7 @@ void initialize(Local<Object> exports, Local<Value> module, Local<Context> ctx) 
   NODE_SET_METHOD(exports, "line_event_read", line_event_read);
 
   NODE_SET_METHOD(exports, "version_string", version_string);
+  NODE_SET_METHOD(exports, "line_trigger", line_trigger);
 }
 
 NODE_MODULE(NODE_GYP_MODULE_NAME, initialize)
