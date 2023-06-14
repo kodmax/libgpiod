@@ -139,8 +139,8 @@ export const lineRequestEvents = (line: Line, consumerId: ConsumerId, edge: Edge
  * @param line 
  * @param timeout 
  */
-export const lineEventWait = (line: Line, sec: number, nanosec: number): STimeout | SEvent | SError => {
-    return line_event_wait(line, sec, nanosec)
+export const lineEventWait = (line: Line, sec: number, nsec: number): STimeout | SEvent | SError => {
+    return line_event_wait(line, sec, nsec)
 }
 
 /**
@@ -152,7 +152,8 @@ export const lineEventRead = (line: Line): Event | SError => {
     const event = line_event_read(line)
     return event[0] === 0
         ? {
-            ts: event[2] + event[3] / 1000_000_000,
+            nsec: event[3],
+            sec: event[2],
             type: event[1]
         }
         : -1
@@ -171,7 +172,8 @@ export const lineEventReadFd = (fd: number): Event | SError => {
     const event = line_event_read_fd(fd)
     return event[0] === 0
         ? {
-            ts: event[2] + event[3] / 1000_000_000,
+            nsec: event[3],
+            sec: event[2],
             type: event[1]
         }
         : -1

@@ -19,16 +19,12 @@ export type SEvent = typeof StatusEvent
 export type Edge = typeof FallingEdge | typeof RisingEdge | typeof BothEdges
 export type ConsumerId = string
 
-export type Timespec = {
-    nanosec: number
-    sec: number
-}
-
 export type EventType = typeof EventTypeFalling | typeof EventTypeRising
 
 export type Event = {
     type: EventType
-    ts: number
+    nsec: number
+    sec: number
 }
 
 /**
