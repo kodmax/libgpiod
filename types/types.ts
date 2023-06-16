@@ -9,13 +9,13 @@ import {
     StatusTimeout,
     StatusError,
     StatusEvent
-} from "./consts"
+} from './consts'
 
 export type SSuccess = typeof StatusSuccess
 export type SError = typeof StatusError
 export type STimeout = typeof StatusTimeout
 export type SEvent = typeof StatusEvent
-    
+
 export type Edge = typeof FallingEdge | typeof RisingEdge | typeof BothEdges
 export type ConsumerId = string
 

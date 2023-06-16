@@ -21,6 +21,7 @@ const led = chipGetLine(chip, 17)
 lineRequestEvents(button, 'ButtonExample', 'both')
 lineRequestOutput(led, 'ButtonExample', 0)
 
+// eslint-disable-next-line
 while (true) {
     const status = lineEventWait(button, 10, 0)
     if (status === StatusEvent) {

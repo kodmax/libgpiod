@@ -28,7 +28,7 @@ const {
 /**
  * @brief Open a gpiochip based on the best guess what the path is.
  * @param name f.ex gpiochip0
- * 
+ *
  * This routine tries to figure out whether the user passed it the path to the
  * GPIO chip, its name, label or number as a string. Then it tries to open it
  * using one of the gpiod_chip_open** variants.
@@ -47,7 +47,7 @@ export const chipOpenByName = (name: string): Chip | null => {
 
 /**
  * @brief Close a GPIO chip handle and release all allocated resources.
- * @param chip 
+ * @param chip
  */
 export const chipClose = (chip: Chip): void => {
     chip_close(chip)
@@ -74,7 +74,7 @@ export const lineRequestOutput = (line: Line, consumerId: ConsumerId, initialVal
 
 /**
  * @brief Reserve a single line, set the direction to input.
- * @param line 
+ * @param line
  * @param consumerId an identifier of the client, can be any string indicating your application
  */
 export const lineRequestInput = (line: Line, consumerId: ConsumerId): SSuccess | SError => {
@@ -83,7 +83,7 @@ export const lineRequestInput = (line: Line, consumerId: ConsumerId): SSuccess |
 
 /**
  * @brief Release a previously reserved line.
- * @param line 
+ * @param line
  */
 export const lineRelease = (line: Line): void => {
     line_release(line)
@@ -92,7 +92,7 @@ export const lineRelease = (line: Line): void => {
 /**
  * @brief Set the value of a single GPIO line.
  * @param line
- * @param value 
+ * @param value
  */
 export const lineSetValue = (line: Line, value: BitValue): SSuccess | SError => {
     return line_set_value(line, value)
@@ -105,7 +105,7 @@ export const lineTrigger = (line: Line, value: BitValue, usec: number): SSuccess
 /**
  * @brief Read current value of a single GPIO line.
  * @param line
- * @param value 
+ * @param value
  */
 export const lineGetValue = (line: Line): BitValue | SError => {
     return line_get_value(line)
@@ -121,9 +121,9 @@ export const getLibgpiodVersionString = (): string => {
 
 /**
  * @brief Request notifications on a single line.
- * @param line 
- * @param consumerId 
- * @param edge 
+ * @param line
+ * @param consumerId
+ * @param edge
  */
 export const lineRequestEvents = (line: Line, consumerId: ConsumerId, edge: Edge): SSuccess | SError => {
     switch (edge) {
@@ -141,17 +141,17 @@ export const lineRequestEvents = (line: Line, consumerId: ConsumerId, edge: Edge
 
 /**
  * @brief Wait for an event on a single line.
- * @param line 
- * @param timeout 
+ * @param line
+ * @param timeout
  */
 export const lineEventWait = (line: Line, sec: number, nsec: number): STimeout | SEvent | SError => {
     return line_event_wait(line, sec, nsec)
 }
 
 /**
- * @brief Read next pending event from the GPIO line. 
- * @param line 
- * @returns 
+ * @brief Read next pending event from the GPIO line.
+ * @param line
+ * @returns
  */
 export const lineEventRead = (line: Line): Event | SError => {
     const event = line_event_read(line)
@@ -167,7 +167,7 @@ export const lineEventRead = (line: Line): Event | SError => {
 /**
  * @brief Get the event file descriptor.
  * @param line
- * @returns 
+ * @returns
  */
 export const lineEventGetFD = (line: Line): number | SError => {
     return line_event_get_fd(line)
