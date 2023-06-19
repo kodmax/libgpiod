@@ -1,6 +1,6 @@
 {
   "name": "libgpiod",
-  "version": "1.4.4",
+  "version": "1.4.5",
   "description": "Javascript bindings for libgpiod",
   "repository": {
     "type": "git",
@@ -21,7 +21,6 @@
     "libgpiod"
   ],
   "author": "Marcin Malinowski",
-  "license": "GNU",
   "gypfile": true,
   "dependencies": {
     "@types/bindings": "~1.5.1",
