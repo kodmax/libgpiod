@@ -94,8 +94,8 @@ export const lineRelease = (line: Line): void => {
  * @param line
  * @param value
  */
-export const lineSetValue = (line: Line, value: BitValue): SSuccess | SError => {
-    return line_set_value(line, value)
+export const lineSetValue = (line: Line, value: BitValue, uSleep?: number): SSuccess | SError => {
+    return line_set_value(line, value, uSleep)
 }
 
 export const lineTrigger = (line: Line, value: BitValue, usec: number): SSuccess | SError => {
