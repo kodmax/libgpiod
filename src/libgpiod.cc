@@ -247,7 +247,7 @@ void line_request_both_edges_events(const FunctionCallbackInfo<Value> &args) {
 void line_set_value(const FunctionCallbackInfo<Value> &args) {
   Isolate *isolate = args.GetIsolate();
 
-  if (args.Length() != 2 || !args[0]->IsExternal() || !args[1]->IsNumber()) {
+  if (args.Length() < 2 || !args[0]->IsExternal() || !args[1]->IsNumber()) {
     isolate->ThrowException(Exception::TypeError(String::NewFromUtf8(isolate, "Wrong arguments").ToLocalChecked()));
     return;
   }
