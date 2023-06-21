@@ -252,9 +252,14 @@ void line_set_value(const FunctionCallbackInfo<Value> &args) {
     return;
   }
 
+  uint32_t sleep = args[2]->Uint32Value(isolate->GetCurrentContext()).FromMaybe(0);
   uint32_t val = args[1]->Int32Value(isolate->GetCurrentContext()).FromMaybe(0);
 
   int status = gpiod_line_set_value((gpiod_line *)External::Cast(*args[0])->Value(), val);
+  if (sleep > 0) {
+    usleep(sleep);
+  }
+
   args.GetReturnValue().Set(Number::New(isolate, status));
 }
 
