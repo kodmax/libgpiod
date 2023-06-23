@@ -13,13 +13,15 @@
   "main": "dist/index.js",
   "scripts": {
     "test": "yarn test",
-    "install": "node-gyp rebuild",
+    "install": "node dist/install.js",
     "lint": "eslint . --fix",
     "docs": "typedoc index.ts"
   },
   "keywords": [
     "gpio",
-    "libgpiod"
+    "libgpiod",
+    "raspberry",
+    "pi"
   ],
   "author": "Marcin Malinowski",
   "gypfile": true,
