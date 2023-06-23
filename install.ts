@@ -43,7 +43,7 @@ const isSuitableEnvironment = async () => {
                     } else {
                         resolve()
                     }
-                })    
+                })
             })
         })
 
